@@ -1,25 +1,25 @@
 import React from 'react';
 import { getInitials } from '../../utils/helper';
-import { useNavigation } from '@react-navigation/native';
-import { Avatar, Card, IconButton } from 'react-native-paper';
+import { Avatar, Card } from 'react-native-paper';
+import { StyleSheet } from 'react-native-web'
 
 
-const LessonCardListItem = ({ lesson, style }) => {
-  const navigation = useNavigation();
-  const { _id, title } = lesson;
+export default function LessonCardListItem ({ lesson }) {
 
-  const onPress = () => {
-    // navigation.push('Lesson', { _id });
-  }
+  const { title } = lesson;
+  const initials = getInitials(title, 2);
 
   return (
-    <Card style={style} onPress={onPress}>
+    <Card style={styles.card}>
       <Card.Title
         title={title}
-        left={props => <Avatar.Text label={getInitials(title, 2)} {...props} />}
-        // right={props => <IconButton icon="dots-vertical" {...props} />}
+        left={props => <Avatar.Text label={initials} {...props} />}
       />
     </Card>
   );
 }
-export default LessonCardListItem;
+
+
+const styles = StyleSheet.create({
+  card: { borderRadius: 0 }
+});

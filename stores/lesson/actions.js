@@ -1,9 +1,8 @@
-import Firebase from 'firebase/app';
-import 'firebase/database';
+import { Database, createUniqueKey } from '../../utils/firebase';
 
 
 const refPath = '/lessons';
-const createUniqueKey = () => Firebase.database().ref('/').push().key;
+const lessonsRef = () => Database.ref(refPath);
 
 const types = {
   ADD: 'LESSONS_ADD',
@@ -23,67 +22,58 @@ const loadingFailure = (error) => {
   return { type: types.LOADING_FAILURE, payload: { error }};
 };
 
-export const loadLessons = () => {
+export const loadLessons = () => dispatch => {
+  return new Promise(async (resolve, reject) => {
 
-  const onSuccess = (dispatch, snapshot, resolve) => {
-    const entries = Object.entries(snapshot.val() || {});
-    const data = entries.map(([_id, lesson]) => ({...lesson, _id}));
-    dispatch(loadingSuccess(data));
-    resolve(data);
-  }
-  const onFailure = (dispatch, error, reject) => {
-    dispatch(loadingFailure(error));
-    reject(error);
-  }
+    const onSuccess = (snapshot) => {
+      const entries = Object.entries(snapshot.val() || {});
+      const data = entries.map(([_id, lesson]) => ({...lesson, _id}));
+      dispatch(loadingSuccess(data));
+      resolve(data);
+    }
+    const onFailure = (error) => {
+      dispatch(loadingFailure(error));
+      reject(error);
+    }
 
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      try {
-        dispatch(loading());
-        Firebase.database().ref(refPath).once('value',
-          (snapshot) => onSuccess(dispatch, snapshot, resolve),
-          (error) => onFailure(dispatch, error, reject)
-        );
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+    try {
+      dispatch(loading());
+      await lessonsRef().once('value', onSuccess, onFailure);
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
-export const addLesson = lesson => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      try {
-        const _id = createUniqueKey();
-        const data = { _id, ...lesson };
+export const addLesson = lesson => dispatch => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const _id = createUniqueKey();
+      const data = { _id, ...lesson };
 
-        Firebase.database().ref(refPath).child(_id).set(lesson, (error) => {
-          if (error) return reject(error);
-          dispatch({ type: types.ADD, payload: {data} });
-          resolve(data);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+      await lessonsRef().child(_id).set(lesson, (error) => {
+        if (error) return reject(error);
+        dispatch({ type: types.ADD, payload: {data} });
+        resolve(data);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
-export const removeLesson = id => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      try {
-        Firebase.database().ref(refPath).child(id).remove((error) => {
-          if (error) return reject(error);
-          dispatch({ type: types.REMOVE, payload: {id} })
-          resolve();
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+export const removeLesson = id => dispatch => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await lessonsRef().child(id).remove((error) => {
+        if (error) return reject(error);
+        dispatch({ type: types.REMOVE, payload: {id} })
+        resolve();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 export default { loadLessons, addLesson, removeLesson };

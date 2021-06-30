@@ -1,26 +1,34 @@
 import React from 'react';
-import { getAverage, getInitials } from '../../utils/helper';
 import { useNavigation } from '@react-navigation/native';
+import { getAverage, getInitials } from '../../utils/helper';
 import { Avatar, Card, IconButton } from 'react-native-paper';
+import { StyleSheet } from 'react-native-web'
 
 
-const StudentCardListItem = ({ student }) => {
-  const navigation = useNavigation();
+export default function StudentCardListItem({ student }) {
+
   const { _id, name, notes, url } = student;
+  const initials = getInitials(name, 2);
+  const average = getAverage(notes);
+  const navigation = useNavigation();
 
   const onPress = () => {
     navigation.push('Student', { _id });
   }
 
   return (
-    <Card onPress={onPress} style={{ borderRadius: 0 }}>
+    <Card onPress={onPress} style={styles.card}>
       <Card.Title
         title={name}
-        subtitle={'Average: ' + getAverage(notes)}
-        left={props => <Avatar.Text label={getInitials(name, 2)} {...props} />}
+        subtitle={'Average: ' + average}
+        left={props => <Avatar.Text label={initials} {...props} />}
         right={props => <IconButton icon="chevron-right" {...props} />}
       />
     </Card>
   );
 }
-export default StudentCardListItem;
+
+
+const styles = StyleSheet.create({
+  card: { borderRadius: 0 }
+});

@@ -1,6 +1,14 @@
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { View } from 'react-native'
 
+
+export const sortStudentsByAverage = (students, asc) => {
+  return students
+    .map(item => ({ _: getAverage(item.notes), item }))
+    .sort(({_:a},{_:b}) => asc ? a-b : b-a)
+    .map(({ item }) => item);
+}
 
 export const getAverage = values => {
   return (values.reduce((a,b) => a+b, 0) / values.length)
@@ -16,10 +24,8 @@ export const getInitials = (str, count = 1) => {
     .splice(0, count).join('');
 }
 
-export const delay = (ms = 0) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+export const handleError = (error) => {
+  if (error) console.log(error);
 }
 
 export const snapshotItemWithId = (snapshot, id) => {
@@ -34,4 +40,10 @@ export const snapshotListWithId = (snapshot) => {
 
 export const TabIcon = ({ color, size }, icon) => (
   <MaterialCommunityIcons name={icon} color={color} size={size} />
+)
+
+export const Centered = ({ children }) => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    {children}
+  </View>
 )

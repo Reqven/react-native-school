@@ -1,11 +1,9 @@
-import Firebase from 'firebase/app';
-import 'firebase/database';
-import { snapshotItemWithId, snapshotListWithId } from '../../utils/helper'
+import { snapshotItemWithId, snapshotListWithId } from '../../utils/helper';
+import Firebase, { Database, createUniqueKey } from '../../utils/firebase';
 
 
 const refPath = '/students';
-const studentsRef = () => Firebase.database().ref(refPath);
-const createUniqueKey = () => Firebase.database().ref('/').push().key;
+const studentsRef = () => Database.ref(refPath);
 
 const types = {
   ADD: 'STUDENTS_ADD',
@@ -27,7 +25,7 @@ const loadingFailure = (error) => {
 };
 
 export const loadStudents = () => dispatch => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
     const onSuccess = (snapshot) => {
       const data = snapshotListWithId(snapshot);
@@ -41,7 +39,7 @@ export const loadStudents = () => dispatch => {
 
     try {
       dispatch(loading());
-      studentsRef().once('value', onSuccess, onFailure);
+      await studentsRef().once('value', onSuccess, onFailure);
     } catch (error) {
       reject(error);
     }
@@ -49,7 +47,7 @@ export const loadStudents = () => dispatch => {
 };
 
 export const loadStudent = (id) => dispatch => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
     const onSuccess = (snapshot) => {
       if (!snapshot.exists()) {
@@ -64,7 +62,7 @@ export const loadStudent = (id) => dispatch => {
     }
 
     try {
-      studentsRef().child(id).once('value', onSuccess, onFailure);
+      await studentsRef().child(id).once('value', onSuccess, onFailure);
     } catch (error) {
       reject(error);
     }
@@ -72,12 +70,12 @@ export const loadStudent = (id) => dispatch => {
 }
 
 export const addStudent = student => dispatch => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const _id = createUniqueKey();
       const data = { _id, ...student };
 
-      studentsRef().child(_id).set(student, (error) => {
+      await studentsRef().child(_id).set(student, (error) => {
         if (error) return reject(error);
         dispatch({ type: types.ADD, payload: {data} });
         resolve(data);
@@ -89,9 +87,9 @@ export const addStudent = student => dispatch => {
 }
 
 export const removeStudent = id => dispatch => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      studentsRef().child(id).remove((error) => {
+      await studentsRef().child(id).remove((error) => {
         if (error) return reject(error);
         dispatch({ type: types.REMOVE, payload: {id} })
         resolve();
@@ -103,80 +101,76 @@ export const removeStudent = id => dispatch => {
 }
 
 export const incrementAttendance = id => dispatch => {
-  return new Promise((resolve, reject) => {
-
+  return new Promise(async (resolve, reject) => {
     try {
       const studentRef = studentsRef().child(id);
+      const snapshot = await studentRef.get();
 
-      studentRef.get().then(snapshot => {
-        if (!snapshot.exists()) return reject();
-        const data = { _id: id, ...snapshot.val() };
+      if (!snapshot.exists()) return reject(new Error('Not found'));
+      const data = snapshotItemWithId(snapshot, id);
 
-        studentRef
-          .child('attendance')
-          .set(Firebase.database.ServerValue.increment(1), (error) => {
-            if (error) return reject(error);
+      await studentRef
+        .child('attendance')
+        .set(Firebase.database.ServerValue.increment(1), (error) => {
+          if (error) return reject(error);
 
-            data.attendance++;
-            dispatch({ type: types.UPDATE, payload: {data} });
-            resolve(data);
-          });
-      });
+          data.attendance++;
+          dispatch({ type: types.UPDATE, payload: {data} });
+          resolve(data);
+        });
     } catch (error) {
       reject(error);
     }
   });
 }
 
-export const decrementAttendance = id => {
-  return dispatch => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const studentRef = studentsRef().child(id);
-        const snapshot = await studentRef.get();
+export const decrementAttendance = id => dispatch => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const studentRef = studentsRef().child(id);
+      const snapshot = await studentRef.get();
 
-        if (!snapshot.exists()) return reject(new Error('Not found'));
-        let { attendance } = snapshot.val();
-        if (attendance === 0) return reject(new Error('Impossible'));
+      let { attendance } = snapshot.val();
+      if (!snapshot.exists()) return reject(new Error('Not found'));
+      if (attendance === 0) return reject(new Error('Impossible'));
 
-        studentRef
-          .child('attendance')
-          .set(Firebase.database.ServerValue.increment(-1), (error) => {
-            if (error) return reject(error);
-            attendance--;
+      await studentRef
+        .child('attendance')
+        .set(Firebase.database.ServerValue.increment(-1), (error) => {
+          if (error) return reject(error);
+          attendance--;
 
-            const data = { _id: id, ...snapshot.val(), attendance };
-            dispatch({ type: types.UPDATE, payload: {data} });
-            resolve(data);
-          });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+          const data = {...snapshotItemWithId(snapshot, id), attendance };
+          dispatch({ type: types.UPDATE, payload: {data} });
+          resolve(data);
+        });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 export const resetAttendance = id => dispatch => {
   const studentRef = studentsRef().child(id);
 
   const getStudent = snapshot => {
-    if (!snapshot.exists()) return Promise.reject();
+    if (!snapshot.exists()) return Promise.reject(new Error('Not found'));
     const student = {...snapshotItemWithId(snapshot, id), attendance: 0};
     return Promise.resolve(student);
   }
   return studentRef.get()
     .then(getStudent)
-    .then(data => {
+    .then(data => new Promise((resolve, reject) => {
       studentRef.child('attendance').set(0, (error) => {
-        if (error) return Promise.reject(error);
+        if (error) return reject(error);
         dispatch({ type: types.UPDATE, payload: {data} });
-        return Promise.resolve(data);
+        resolve(data);
       });
-    });
+    }));
 }
 
 export const resetAllAttendance = () => dispatch => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
     const transactionUpdate = students => {
       if (!students) return null;
@@ -192,7 +186,11 @@ export const resetAllAttendance = () => dispatch => {
       }
       reject();
     }
-    studentsRef().transaction(transactionUpdate, onComplete);
+    try {
+      await studentsRef().transaction(transactionUpdate, onComplete);
+    } catch(error) {
+      reject(error);
+    }
   });
 }
 
