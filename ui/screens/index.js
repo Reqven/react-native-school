@@ -1,3 +1,5 @@
-export LessonListScreen from './LessonListScreen';
-export StudentListScreen from './StudentListScreen';
-export StudentProfileScreen from './StudentProfileScreen';
+import LessonListScreen from './LessonListScreen';
+import StudentListScreen from './StudentListScreen';
+import StudentProfileScreen from './StudentProfileScreen';
+
+export { LessonListScreen, StudentListScreen, StudentProfileScreen };

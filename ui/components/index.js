@@ -1,4 +1,6 @@
-export LessonCardListItem from './LessonCardListItem';
-export StudentCardListItem from './StudentCardListItem';
-export StudentProfileCard from './StudentProfileCard';
-export SortingCard from './SortingCard';
+import LessonCardListItem from './LessonCardListItem';
+import StudentCardListItem from './StudentCardListItem';
+import StudentProfileCard from './StudentProfileCard';
+import SortingCard from './SortingCard';
+
+export { LessonCardListItem, StudentCardListItem, StudentProfileCard, SortingCard };
