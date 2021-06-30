@@ -1,13 +1,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ActivityIndicator } from 'react-native-paper';
 import { StyleSheet, View, FlatList } from 'react-native';
-import { Centered, sortStudentsByAverage } from '../../utils/helper';
+import { ActivityIndicator, IconButton } from 'react-native-paper';
 import { StudentCardListItem, SortingCard } from '../components';
-import { loadStudents } from '../../stores/student/actions';
+import { Centered, sortStudentsByAverage } from '../../utils/helper';
+import { loadStudents, resetAllAttendance } from '../../stores/student/actions';
 
 
-export default function StudentListScreen() {
+export default function StudentListScreen({ navigation }) {
 
   const { data, loading, initialized } = useSelector(({ students }) => students);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -29,9 +29,17 @@ export default function StudentListScreen() {
     if (!enabled) return setStudents(data);
     setStudents(sortStudentsByAverage(data, direction));
   }
+  const updateNavigationBar = () => {
+    navigation.setOptions({
+      headerRight: () => <IconButton icon="sticker-remove-outline" onPress={() => {
+        dispatch(resetAllAttendance()).catch(alert);
+      }} />
+    });
+  }
 
   React.useEffect(() => { onLoad(); }, []);
   React.useEffect(() => { sortStudents(); }, [data]);
+  React.useEffect(() => { updateNavigationBar() }, []);
 
 
   return (
