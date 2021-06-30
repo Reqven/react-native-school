@@ -1,0 +1,50 @@
+{
+  "lessons" : {
+    "-MbprFqBD3nHM-mCbdFP" : {
+      "title" : "React"
+    },
+    "-MbprFqBD3nHM-mCbdFQ" : {
+      "title" : "React Native"
+    },
+    "-MbprFqBD3nHM-mCbdFR" : {
+      "title" : "MongoDB"
+    }
+  },
+  "students" : {
+    "-MbprFq92dC4-IeZ3YiN" : {
+      "attendance" : 0,
+      "lessons" : [ "-MbprFqBD3nHM-mCbdFP", "-MbprFqBD3nHM-mCbdFQ" ],
+      "name" : "Alice",
+      "notes" : [ 11, 12, 18 ],
+      "url" : "http://lorempixel.com/100/100/cats/1"
+    },
+    "-MbprFq92dC4-IeZ3YiO" : {
+      "attendance" : 0,
+      "lessons" : [ "-MbprFqBD3nHM-mCbdFR" ],
+      "name" : "Alan",
+      "notes" : [ 10, 14.5, 11 ],
+      "url" : "http://lorempixel.com/100/100/cats/2"
+    },
+    "-MbprFqAy41rUhgINnqU" : {
+      "attendance" : 0,
+      "lessons" : [ "-MbprFqBD3nHM-mCbdFP", "-MbprFqBD3nHM-mCbdFQ", "-MbprFqBD3nHM-mCbdFR" ],
+      "name" : "Phil",
+      "notes" : [ 11, 9, 9 ],
+      "url" : "http://lorempixel.com/100/100/cats/2"
+    },
+    "-MbprFqAy41rUhgINnqV" : {
+      "attendance" : 0,
+      "lessons" : [ "-MbprFqBD3nHM-mCbdFP" ],
+      "name" : "Naoudi",
+      "notes" : [ 14.5, 19, 18 ],
+      "url" : "http://lorempixel.com/100/100/cats/3"
+    },
+    "-MbprFqBD3nHM-mCbdFO" : {
+      "attendance" : 0,
+      "lessons" : [ "-MbprFqBD3nHM-mCbdFR" ],
+      "name" : "Fenley",
+      "notes" : [ 9, 7, 11 ],
+      "url" : "http://lorempixel.com/100/100/cats/4"
+    }
+  }
+}
