@@ -1,20 +1,19 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet, Text, View } from 'react-native'
 import { Avatar, Button, Caption, Card, Chip, List, Title } from 'react-native-paper';
 import { decrementAttendance, incrementAttendance, resetAttendance } from '../../stores/student/actions';
 import { getLessonsByStudentId } from '../../stores/lesson/selectors';
-import { getAverage, getInitials } from '../../utils/helper';
-import { useDispatch, useSelector } from 'react-redux';
+import { getAverage } from '../../utils/helper';
 
 
 export default function StudentProfileCard({ student }) {
 
-  const { _id, name, attendance, notes } = student;
+  const { _id, name, attendance, notes, url } = student;
   const lessons = useSelector(state => getLessonsByStudentId(state, _id));
   const dispatch = useDispatch();
 
   const average = getAverage(notes);
-  const initials = getInitials(name);
 
   const increment = () => dispatch(incrementAttendance(_id)).catch(alert);
   const decrement = () => dispatch(decrementAttendance(_id)).catch(alert);
@@ -24,7 +23,7 @@ export default function StudentProfileCard({ student }) {
   return (
     <Card style={{ borderRadius: 0 }}>
       <Card.Content style={{ alignItems: 'center' }}>
-        <Avatar.Text label={initials} />
+        <Avatar.Image source={{ uri: url }} />
         <Title>{name}</Title>
         <Caption>{_id}</Caption>
       </Card.Content>

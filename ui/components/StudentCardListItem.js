@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { getAverage, getInitials } from '../../utils/helper';
 import { Avatar, Card, IconButton } from 'react-native-paper';
-import { StyleSheet } from 'react-native-web'
+import { getAverage } from '../../utils/helper';
+import { StyleSheet } from 'react-native-web';
 
 
 export default function StudentCardListItem({ student }) {
 
   const { _id, name, notes, url } = student;
-  const initials = getInitials(name, 2);
   const average = getAverage(notes);
   const navigation = useNavigation();
 
@@ -21,7 +20,7 @@ export default function StudentCardListItem({ student }) {
       <Card.Title
         title={name}
         subtitle={'Average: ' + average}
-        left={props => <Avatar.Text label={initials} {...props} />}
+        left={props => <Avatar.Image source={{ uri: url }} {...props} />}
         right={props => <IconButton icon="chevron-right" {...props} />}
       />
     </Card>
